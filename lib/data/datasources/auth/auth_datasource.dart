@@ -38,13 +38,19 @@ class AuthDatasourceImpl implements AuthDatasource {
       final response = e.response;
       if (response != null && response.data is Map<String, dynamic>) {
         final data = response.data as Map<String, dynamic>;
+        final statusCode = response.statusCode;
+        final messageApi = data['message'] ?? 'Error desconocido';
+
         throw ApiException(
-          message: data['message'] ?? 'Error desconocido',
+          message: '[$statusCode] $messageApi',
           code: data['error_code'],
           path: data['path'],
         );
       }
-      throw ApiException(message: 'Error de red o servidor');
+
+      throw ApiException(
+        message: 'Error de red o servidor: ${e.message}',
+      );
     }
   }
 }
