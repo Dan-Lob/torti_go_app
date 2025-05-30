@@ -178,37 +178,51 @@ class _BottomNavBar extends StatelessWidget {
       return 0;
     }
 
-    return BottomNavigationBar(
-      currentIndex: currentIndex(),
-      onTap: (index) {
-        switch (index) {
-          case 0:
-            context.go('/home');
-            break;
-          case 1:
-            context.go('/mis-pedidos');
-            break;
-          case 2:
-            context.go('/billetera');
-            break;
-          case 3:
-            context.go('/notificaciones');
-            break;
-          case 4:
-            context.go('/perfil');
-            break;
-        }
-      },
-      selectedItemColor: Colors.deepOrange,
-      unselectedItemColor: Colors.grey,
-      type: BottomNavigationBarType.fixed,
-      items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-        BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Pedidos'),
-        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Billetera'),
-        BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notificaciones'),
-        BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-      ],
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.deepOrange.shade400,
+            Colors.orangeAccent.shade200,
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: BottomNavigationBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        currentIndex: currentIndex(),
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.go('/home');
+              break;
+            case 1:
+              context.go('/mis-pedidos');
+              break;
+            case 2:
+              context.go('/billetera');
+              break;
+            case 3:
+              context.go('/notificaciones');
+              break;
+            case 4:
+              context.go('/perfil');
+              break;
+          }
+        },
+        selectedItemColor: Colors.white,
+        unselectedItemColor: Colors.white70,
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Pedidos'),
+          BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Billetera'),
+          BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notificaciones'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
+      ),
     );
   }
 }
