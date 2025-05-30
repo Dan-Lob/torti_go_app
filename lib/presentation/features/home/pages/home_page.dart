@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:torti_go_app/presentation/shared/widgets/custom_icon_button.dart';
 
 class HomePage extends StatelessWidget {
@@ -53,7 +54,7 @@ class _HeaderSection extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              Navigator.pushNamed(context, '/notificaciones');
+              context.go('/notificaciones');
             },
             icon: Icon(Icons.notifications_none, size: 24.sp),
           ),
@@ -102,7 +103,7 @@ class _MainActionCard extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
           ElevatedButton(
-            onPressed: () => Navigator.pushNamed(context, '/pedido'),
+            onPressed: () => context.go('/pedido'),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE65100),
               shape: RoundedRectangleBorder(
@@ -139,22 +140,22 @@ class _QuickAccessGrid extends StatelessWidget {
           CustomIconButton(
             icon: Icons.shopping_cart,
             label: 'Mis pedidos',
-            onPressed: () => Navigator.pushNamed(context, '/mis-pedidos'),
+            onPressed: () => context.go('/mis-pedidos'),
           ),
           CustomIconButton(
             icon: Icons.schedule,
             label: 'Horarios',
-            onPressed: () => Navigator.pushNamed(context, '/horarios'),
+            onPressed: () => context.go('/horarios'),
           ),
           CustomIconButton(
             icon: Icons.account_balance_wallet,
             label: 'Billetera',
-            onPressed: () => Navigator.pushNamed(context, '/billetera'),
+            onPressed: () => context.go('/billetera'),
           ),
           CustomIconButton(
             icon: Icons.person,
             label: 'Mi perfil',
-            onPressed: () => Navigator.pushNamed(context, '/perfil'),
+            onPressed: () => context.go('/perfil'),
           ),
         ],
       ),
@@ -162,34 +163,40 @@ class _QuickAccessGrid extends StatelessWidget {
   }
 }
 
-class _BottomNavBar extends StatefulWidget {
+class _BottomNavBar extends StatelessWidget {
   const _BottomNavBar();
 
   @override
-  State<_BottomNavBar> createState() => _BottomNavBarState();
-}
-
-class _BottomNavBarState extends State<_BottomNavBar> {
-  int _currentIndex = 0;
-
-  final List<String> _routes = [
-    '/home',
-    '/mis-pedidos',
-    '/billetera',
-    '/notificaciones',
-    '/perfil',
-  ];
-
-  @override
   Widget build(BuildContext context) {
+    final String location = GoRouterState.of(context).uri.toString();
+
+    int currentIndex() {
+      if (location.startsWith('/mis-pedidos')) return 1;
+      if (location.startsWith('/billetera')) return 2;
+      if (location.startsWith('/notificaciones')) return 3;
+      if (location.startsWith('/perfil')) return 4;
+      return 0;
+    }
+
     return BottomNavigationBar(
-      currentIndex: _currentIndex,
+      currentIndex: currentIndex(),
       onTap: (index) {
-        if (_routes[index] != ModalRoute.of(context)?.settings.name) {
-          setState(() {
-            _currentIndex = index;
-          });
-          Navigator.pushReplacementNamed(context, _routes[index]);
+        switch (index) {
+          case 0:
+            context.go('/home');
+            break;
+          case 1:
+            context.go('/mis-pedidos');
+            break;
+          case 2:
+            context.go('/billetera');
+            break;
+          case 3:
+            context.go('/notificaciones');
+            break;
+          case 4:
+            context.go('/perfil');
+            break;
         }
       },
       selectedItemColor: Colors.deepOrange,
@@ -198,10 +205,8 @@ class _BottomNavBarState extends State<_BottomNavBar> {
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
         BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Pedidos'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.account_balance_wallet), label: 'Billetera'),
-        BottomNavigationBarItem(
-            icon: Icon(Icons.notifications), label: 'Notificaciones'),
+        BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet), label: 'Billetera'),
+        BottomNavigationBarItem(icon: Icon(Icons.notifications), label: 'Notificaciones'),
         BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
       ],
     );
