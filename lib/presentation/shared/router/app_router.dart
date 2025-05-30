@@ -10,11 +10,17 @@ import 'package:torti_go_app/presentation/features/profile/pages/perfil_page.dar
 import 'package:torti_go_app/presentation/features/schedule/pages/horarios_page.dart';
 import 'package:torti_go_app/presentation/features/wallet/pages/billetera_page.dart';
 import 'package:torti_go_app/presentation/features/notifications/pages/notificaciones_page.dart';
+import 'package:torti_go_app/presentation/shared/pages/splash_page.dart';
+
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/',
     routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const SplashPage(),
+      ),
       GoRoute(
         path: '/login',
         builder: (context, state) => const LoginPage(),
