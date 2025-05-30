@@ -1,56 +1,78 @@
-// lib/data/datasources/auth/auth_datasource.dart
+// Ruta: lib/data/datasources/auth/auth_datasource.dart
 
 import 'package:dio/dio.dart';
-import 'package:torti_go_app/data/models/auth/login_request_model.dart';
-import 'package:torti_go_app/data/models/auth/login_response_model.dart';
-import 'package:torti_go_app/data/models/common/base_response_model.dart';
-import 'package:torti_go_app/domain/entities/auth/login_response.dart';
-import 'package:torti_go_app/core/exceptions/api_exception.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:torti_go_app/core/exceptions/server_exception.dart';
+import 'package:torti_go_app/core/config/env.dart';
 
 abstract class AuthDatasource {
-  Future<LoginResponse> login(LoginRequestModel request);
+  Future<String> login(String email, String password);
+  Future<void> saveToken(String token);
+  Future<String?> getToken();
+  Future<void> clearToken();
+  Future<String> refreshToken(String token);
 }
 
 class AuthDatasourceImpl implements AuthDatasource {
   final Dio dio;
+  final FlutterSecureStorage secureStorage;
 
-  AuthDatasourceImpl(this.dio);
+  static const String _tokenKey = 'auth_token';
+
+  AuthDatasourceImpl({
+    required this.dio,
+    required this.secureStorage,
+  });
 
   @override
-  Future<LoginResponse> login(LoginRequestModel request) async {
+  Future<String> login(String email, String password) async {
     try {
       final response = await dio.post(
-        '/auth/login',
-        data: request.toJson(),
+        '${Env.baseUrl}/auth/login',
+        data: {
+          'email': email,
+          'password': password,
+        },
       );
 
-      final base = BaseResponseModel<LoginResponseModel>.fromJson(
-        response.data,
-        (data) => LoginResponseModel.fromJson(data),
+      final token = response.data['data']['token'];
+      await saveToken(token);
+      return token;
+    } catch (e) {
+      throw ServerException.handleDioError(e);
+    }
+  }
+
+  @override
+  Future<void> saveToken(String token) async {
+    await secureStorage.write(key: _tokenKey, value: token);
+  }
+
+  @override
+  Future<String?> getToken() async {
+    return secureStorage.read(key: _tokenKey);
+  }
+
+  @override
+  Future<void> clearToken() async {
+    await secureStorage.delete(key: _tokenKey);
+  }
+
+  @override
+  Future<String> refreshToken(String token) async {
+    try {
+      final response = await dio.post(
+        '${Env.baseUrl}/auth/refresh',
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+        ),
       );
 
-      if (!base.success || base.data == null) {
-        throw ApiException(message: base.message);
-      }
-
-      return base.data!.toEntity();
-    } on DioException catch (e) {
-      final response = e.response;
-      if (response != null && response.data is Map<String, dynamic>) {
-        final data = response.data as Map<String, dynamic>;
-        final statusCode = response.statusCode;
-        final messageApi = data['message'] ?? 'Error desconocido';
-
-        throw ApiException(
-          message: '[$statusCode] $messageApi',
-          code: data['error_code'],
-          path: data['path'],
-        );
-      }
-
-      throw ApiException(
-        message: 'Error de red o servidor: ${e.message}',
-      );
+      final newToken = response.data['data']['token'];
+      await saveToken(newToken);
+      return newToken;
+    } catch (e) {
+      throw ServerException.handleDioError(e);
     }
   }
 }
